@@ -1,6 +1,5 @@
 package com.rizvi.rest.webservices.restful_web_services.user;
 
-import com.rizvi.rest.webservices.restful_web_services.exception.UserNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -29,13 +28,20 @@ public class UserDaoService {
         Predicate<? super User> predicate = user -> user.getId().equals(id);
         return users.stream().filter(predicate)
                 .findFirst()
-                .orElseThrow(() -> new UserNotFoundException("id-" + id));
+                .orElse(null);
+                //.orElseThrow(() -> new UserNotFoundException("id-" + id));
     }
 
     public User save(User user) {
         user.setId(++userCount);
         users.add(user);
         return user;
+    }
+
+    public void deleteById(int id) {
+        Predicate<? super User> predicate = user -> user.getId().equals(id);
+        users.removeIf(predicate);
+       // return users.stream().filter(predicate).findFirst().orElse(null);
     }
 
 }
