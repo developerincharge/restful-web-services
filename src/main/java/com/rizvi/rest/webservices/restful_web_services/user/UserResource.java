@@ -2,6 +2,8 @@ package com.rizvi.rest.webservices.restful_web_services.user;
 
 import com.rizvi.rest.webservices.restful_web_services.exception.UserNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,12 +25,19 @@ public class UserResource {
         return userDaoService.findAll();
     }
 
+    //http://localhost:8080/users
+
+    // EntityModel
     @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int id) {
+    public EntityModel<User> retrieveUser(@PathVariable int id) {
         User user = userDaoService.findOne(id);
         if (user == null)
             throw new UserNotFoundException("id-" + id);
-            return user;
+
+        EntityModel<User> entityModel = EntityModel.of(user);
+        WebMvcLinkBuilder linkToUsers = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).retrieveAllUsers());
+        entityModel.add(linkToUsers.withRel("all-users"));
+        return entityModel;
         }
 
     @DeleteMapping("/users/{id}")
@@ -36,8 +45,6 @@ public class UserResource {
           userDaoService.deleteById(id);
 
     }
-
-
 
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
